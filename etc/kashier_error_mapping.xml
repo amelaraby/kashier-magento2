@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<mapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Payment:etc/error_mapping.xsd">
+    <message_list>
+        <message code="200" translate="true">3DSecure verification required.</message>
+        <message code="900" translate="true">Error communicating with payment gateway.</message>
+    </message_list>
+</mapping>

@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="KashierFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">ITeam\Kashier\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form\Cc</argument>
+            <argument name="infoBlockType" xsi:type="string">ITeam\Kashier\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">KashierValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">KashierCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="KashierCreditCardVaultFacade" type="Magento\Vault\Model\Method\Vault">
+        <arguments>
+            <argument name="config" xsi:type="object">KashierVaultConfig</argument>
+            <argument name="valueHandlerPool" xsi:type="object">KashierVaultValueHandlerPool</argument>
+            <argument name="vaultProvider" xsi:type="object">KashierFacade</argument>
+            <argument name="code" xsi:type="const">ITeam\Kashier\Model\Ui\ConfigProvider::CC_VAULT_CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="KashierVaultConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">ITeam\Kashier\Model\Ui\ConfigProvider::CC_VAULT_CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="KashierVaultValueHandler" type="VaultPaymentDefaultValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">KashierVaultConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="KashierVaultValueHandlerPool" type="VaultPaymentValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">KashierVaultValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="KashierConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">\ITeam\Kashier\Model\Ui\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Logger -->
+    <virtualType name="KashierLogger" type="Magento\Payment\Model\Method\Logger">
+        <arguments>
+            <argument name="config" xsi:type="object">KashierConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="KashierCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="capture" xsi:type="string">KashierCaptureCommand</item>
+                <item name="vault_sale" xsi:type="string">KashierVaultCaptureCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Capture command -->
+    <virtualType name="KashierCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">ITeam\Kashier\Gateway\Request\CaptureRequest</argument>
+            <argument name="handler" xsi:type="object">ITeam\Kashier\Gateway\Response\CaptureHandler</argument>
+            <argument name="transferFactory" xsi:type="object">ITeam\Kashier\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">ITeam\Kashier\Gateway\Validator\CaptureValidator</argument>
+            <argument name="client" xsi:type="object">ITeam\Kashier\Gateway\Http\Client\Kashier</argument>
+            <argument name="errorMessageMapper" xsi:type="object">ITeam\Kashier\Gateway\ErrorMapper\ErrorMessageMapper</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="KashierVaultCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">ITeam\Kashier\Gateway\Request\VaultCaptureRequest</argument>
+            <argument name="handler" xsi:type="object">ITeam\Kashier\Gateway\Response\VaultCaptureHandler</argument>
+            <argument name="transferFactory" xsi:type="object">ITeam\Kashier\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">ITeam\Kashier\Gateway\Validator\CaptureValidator</argument>
+            <argument name="client" xsi:type="object">ITeam\Kashier\Gateway\Http\Client\Kashier</argument>
+            <argument name="errorMessageMapper" xsi:type="object">ITeam\Kashier\Gateway\ErrorMapper\ErrorMessageMapper</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Response handlers -->
+    <virtualType name="KashierResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="capture" xsi:type="string">ITeam\Kashier\Gateway\Response\CaptureHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="KashierValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">KashierConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="KashierConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">KashierConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="ITeam\Kashier\Block\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">KashierConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Adapter -->
+    <type name="ITeam\Kashier\Model\Adapter\KashierAdapter">
+        <arguments>
+            <argument name="config" xsi:type="object">KashierConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Error Mapper -->
+    <virtualType name="ITeam\Kashier\Gateway\ErrorMapper\VirtualConfigReader" type="Magento\Payment\Gateway\ErrorMapper\VirtualConfigReader">
+        <arguments>
+            <argument name="fileName" xsi:type="string">kashier_error_mapping.xml</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="ITeam\Kashier\Gateway\ErrorMapper\VirtualMappingData" type="Magento\Payment\Gateway\ErrorMapper\MappingData">
+        <arguments>
+            <argument name="reader" xsi:type="object">ITeam\Kashier\Gateway\ErrorMapper\VirtualConfigReader</argument>
+            <argument name="cacheId" xsi:type="string">kashier_error_mapper</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="ITeam\Kashier\Gateway\ErrorMapper\ErrorMessageMapper">
+        <arguments>
+            <argument name="messageMapping" xsi:type="object">ITeam\Kashier\Gateway\ErrorMapper\VirtualMappingData</argument>
+        </arguments>
+    </type>
+
+
+    <virtualType name="KashierCommandManager" type="Magento\Payment\Gateway\Command\CommandManager">
+        <arguments>
+            <argument name="commandPool" xsi:type="object">KashierCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Payment\Gateway\Command\CommandManagerPool">
+        <arguments>
+            <argument name="executors" xsi:type="array">
+                <item name="kashier" xsi:type="string">KashierCommandManager</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
