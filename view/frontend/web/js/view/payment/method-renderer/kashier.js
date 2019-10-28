@@ -85,7 +85,11 @@ define([
             this._super()
                 .observe(['active', 'acsUrl', 'termUrl', 'paReq', 'showThreeDsIframe', 'threeDsResponse', 'tokenizationResponse']);
 
-            this._initCustomCardTypesSelectedCard();
+            const self = this;
+            setTimeout(function () {
+                self._initCustomCardTypesSelectedCard();
+            }, 1000);
+
             this._initIframeListener();
 
             return this;
@@ -170,12 +174,12 @@ define([
                                     self._placeOrderFailureHandler(jqXHR, textStatus, errorThrown);
                                 }
                             ).done(function () {
-                                self.afterPlaceOrder();
+                            self.afterPlaceOrder();
 
-                                if (self.redirectAfterPlaceOrder) {
-                                    redirectOnSuccessAction.execute();
-                                }
-                            });
+                            if (self.redirectAfterPlaceOrder) {
+                                redirectOnSuccessAction.execute();
+                            }
+                        });
 
                         return true;
                     })
